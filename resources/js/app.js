@@ -6,7 +6,6 @@
  */
 
 require('./bootstrap');
-
 window.Vue = require('vue');
 
 /**
@@ -22,7 +21,8 @@ window.Vue = require('vue');
 
 Vue.component('app-navbar', require('./components/Navbar.vue').default);
 Vue.component('app-restaurant', require('./components/Retaurant.vue').default);
-// Vue.component('google-map', require('./components/GoogleMap.vue').default);
+
+
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
