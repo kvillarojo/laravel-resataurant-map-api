@@ -15,8 +15,8 @@ class Restaurant extends Model
         'longitude',
         'monthly_sales',
         'daily_sales',
-        'specialty_id',
-        'category_id',
+        'specialty',
+        'category',
         'open_hrs',
     ];
 

@@ -1812,6 +1812,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'google-map',
@@ -1845,12 +1854,11 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.get('/api/restaurant').then(function (res) {
-        _this.restoList = res.data.resto;
-        _this.category = res.data.categories;
-        _this.specialty = res.data.specialty; // console.log(this.restoList);
-        // setTimeout(() => {
-        //   this.loadCoordinates(res.data.resto);
-        // }, 100);
+        _this.restoList = res.data; // console.log(this.restoList);
+
+        setTimeout(function () {
+          _this.loadCoordinates(res.data);
+        }, 100);
       }).catch(function (err) {
         console.log(err);
       });
@@ -1902,7 +1910,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     addNewResto: function addNewResto() {
       var self = this;
-      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_name\"> Restaurant Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_name\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <select class=\"form-control\" id=\"rs_category\"></select>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_specialty\"> Specialty </label>\n              <select class=\"form-control\" id=\"rs_specialty\"></select>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_address\"> Address </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_address\">\n            </div>\n            <div class=\"row\">\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_monhtlySales\"> Monthly Sales </label>\n                  <input type=\"number\" class=\"form-control\" id=\"rs_monhtlySales\">\n                </div>\n              </div>\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_dailySales\"> Daily Sales </label>\n                  <input type=\"number\" class=\"form-control\" id=\"rs_dailySales\">\n                </div>\n              </div>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_openhrs\"> Open Hours </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_openhrs\">\n            </div>  \n            <div class=\"form-group\">\n              <label for=\"exampleInputPassword1\"> Coordinates </label>\n              <div class=\"form-inline\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_latitude\" placeholder=\"latitude\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_longitude\" placeholder=\"longitude\" style=\"margin-left:34px\">\n              </div>\n            </div>\n          </form>";
+      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_name\"> Restaurant Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_name\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_category\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_specialty\"> Specialty </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_specialty\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_address\"> Address </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_address\">\n            </div>\n            <div class=\"row\">\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_monhtlySales\"> Monthly Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_monhtlySales\">\n                </div>\n              </div>\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_dailySales\"> Daily Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_dailySales\">\n                </div>\n              </div>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_openhrs\"> Open Hours </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_openhrs\">\n            </div>  \n            <div class=\"form-group\">\n              <label for=\"exampleInputPassword1\"> Coordinates </label>\n              <div class=\"form-inline\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_latitude\" placeholder=\"latitude\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_longitude\" placeholder=\"longitude\" style=\"margin-left:34px\">\n              </div>\n            </div>\n          </form>";
       bootbox__WEBPACK_IMPORTED_MODULE_0___default.a.confirm({
         title: "New Restaurant",
         message: data,
@@ -1915,7 +1923,7 @@ __webpack_require__.r(__webpack_exports__);
           }
         },
         callback: function callback(result) {
-          var data = {
+          var resto = {
             name: $('#rs_name').val(),
             category: $('#rs_category').val(),
             specialty: $('#rs_specialty').val(),
@@ -1923,31 +1931,21 @@ __webpack_require__.r(__webpack_exports__);
             monthly_sales: $('#rs_monhtlySales').val(),
             daily_sales: $('#rs_dailySales').val(),
             open_hrs: $('#rs_openhrs').val(),
-            latitude: $('#rs_latitude').val(),
-            longitude: $('#rs_longitude').val()
+            lat: $('#rs_latitude').val(),
+            long: $('#rs_longitude').val()
           };
 
           if (result) {
-            self.saveResto(data);
+            self.saveResto(resto);
           }
         }
-      });
-      this.category.map(function (obj) {
-        $('#rs_category').append("<option value=\"" + obj.id + "\">" + obj.name + "</option>");
-      });
-      this.specialty.map(function (obj) {
-        $('#rs_specialty').append("<option value=\"" + obj.id + "\">" + obj.name + "</option>");
       });
     },
     saveResto: function saveResto(data) {
       var _this3 = this;
 
       axios.post('/api/restaurant', data).then(function (res) {
-        var localData = data;
-        localData.category = $('#rs_category option:selected').text();
-        localData.specialty = $('#rs_specialty option:selected').text();
-
-        _this3.restoList.push(localData);
+        _this3.restoList.push(data);
       }).catch(function (err) {
         console.log(err);
       });

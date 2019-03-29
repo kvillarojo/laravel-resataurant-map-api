@@ -1,48 +1,57 @@
 <template>
 	<div>
-    <div class="container">
-      <div class="row">
-          <div class="col-md-4 ">
-          <!--     <h3> Search: </h3> -->
-            <div class="form-group">
-              <label for="restaurant_name" class="sr-only"> Restaurant name </label>
-              <input type="text" class="form-control" id="restaurant_name" v-model="search" placeholder="name" style="width:100% ">
-            </div>
-            <div class="form-group">
-              <h3> List </h3>
-              <span class="fa fa-plus" id="add_resto" @click="addNewResto()"
-              ></span>
-              <ul class="list-group list-group-flush">
-                  <li class="list-group-item" v-for="item in filteredRestaurants"  :key="item.id" @click="loadnewCoordinates(item.id)"> <a href="#"> {{ item.name }} </a> </li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md-8">                 
-              <div class="form-group">
-                <h3> Map </h3>
-                <div class="google-map" :id="mapName"></div>
+		<!-- <form @submit.prevent="addArticle" class="mb-3 form-inline"> -->
 
-              </div>   
-              <div class="form-group" v-if="isSelected">
-                  <!-- <h3>Restaurant Details</h3> -->
-                  <div class="row">
-                    <div class="col-md-8">
-                      <h5> {{ selectedResto.name }} </h5>
-                      <label> <b> Address :</b> <span>{{ selectedResto.address }} </span> </label><br>
-                      <label> <b>Category :</b> <span> {{ selectedResto.category }}</span></label><br>
-                      <label> <b>Specialty :</b> <span> {{ selectedResto.specialty }} </span></label><br>
-                      <label> <b>Open Hours :</b> <span> {{ selectedResto.open_hrs }} </span></label>
-                    </div>
-                    <div class="col-md-4" id="sales_div">
-                      <h5> Sales </h5>
-                        <label> <b>Daily :</b> <span> {{ selectedResto.daily_sales }}</span></label><br>
-                        <label> <b>Monthly :</b> <span>{{ selectedResto.monthly_sales }} </span> </label>
-                    </div>
+       <!-- <div class="form-group mx-sm-10 col-md-10">
+          <label for="restaurant_name" class="sr-only"> Restaurant name </label>
+          <input type="text" class="form-control" id="restaurant_name" v-model="search" placeholder="name" style="width:100% ">
+      </div> -->
+            <!-- <button type="submit" class="btn btn-primary col-md-2"> Submit </button> -->
+		<!-- </form> -->
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 ">
+                <!--     <h3> Search: </h3> -->
+                  <div class="form-group">
+                    <label for="restaurant_name" class="sr-only"> Restaurant name </label>
+                    <input type="text" class="form-control" id="restaurant_name" v-model="search" placeholder="name" style="width:100% ">
                   </div>
-              </div>
-          </div>
-      </div>
-    </div>
+                  <div class="form-group">
+                    <h3> List </h3>
+                    <span class="fa fa-plus" id="add_resto" @click="addNewResto()"
+                    ></span>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" v-for="item in filteredRestaurants"  :key="item.id" @click="loadnewCoordinates(item.id)"> <a href="#"> {{ item.name }} </a> </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-8">                 
+                    <div class="form-group">
+                      <h3> Map </h3>
+                      <div class="google-map" :id="mapName"></div>
+
+                    </div>   
+                    <div class="form-group" v-if="isSelected">
+                        <!-- <h3>Restaurant Details</h3> -->
+                        <div class="row">
+                          <div class="col-md-8">
+                            <h5> {{ selectedResto.name }} </h5>
+                            <label> <b> Address :</b> <span>{{ selectedResto.address }} </span> </label><br>
+                            <label> <b>Category :</b> <span> {{ selectedResto.category }}</span></label><br>
+                            <label> <b>Specialty :</b> <span> {{ selectedResto.specialty }} </span></label><br>
+                            <label> <b>Open Hours :</b> <span> {{ selectedResto.open_hrs }} </span></label>
+                          </div>
+                          <div class="col-md-4" id="sales_div">
+                            <h5> Sales </h5>
+                              <label> <b>Daily :</b> <span> {{ selectedResto.daily_sales }}</span></label><br>
+                              <label> <b>Monthly :</b> <span>{{ selectedResto.monthly_sales }} </span> </label>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 	</div>
 </template>
 <script>
@@ -78,13 +87,11 @@ export default {
     loadResto(){
         axios.get('/api/restaurant')
           .then(res => {
-            this.restoList = res.data.resto
-            this.category = res.data.categories
-            this.specialty = res.data.specialty
+            this.restoList = res.data
             // console.log(this.restoList);
-            // setTimeout(() => {
-            //   this.loadCoordinates(res.data.resto);
-            // }, 100);
+            setTimeout(() => {
+              this.loadCoordinates(res.data);
+            }, 100);
             
           }).catch(err => {
           console.log(err)
@@ -139,11 +146,11 @@ export default {
             </div>
             <div class="form-group">
               <label for="rs_category"> Category </label>
-              <select class="form-control" id="rs_category"></select>
+              <input type="text" class="form-control" id="rs_category">
             </div>
             <div class="form-group">
               <label for="rs_specialty"> Specialty </label>
-              <select class="form-control" id="rs_specialty"></select>
+              <input type="text" class="form-control" id="rs_specialty">
             </div>
             <div class="form-group">
               <label for="rs_address"> Address </label>
@@ -153,13 +160,13 @@ export default {
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="rs_monhtlySales"> Monthly Sales </label>
-                  <input type="number" class="form-control" id="rs_monhtlySales">
+                  <input type="text" class="form-control" id="rs_monhtlySales">
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="rs_dailySales"> Daily Sales </label>
-                  <input type="number" class="form-control" id="rs_dailySales">
+                  <input type="text" class="form-control" id="rs_dailySales">
                 </div>
               </div>
             </div>
@@ -188,7 +195,8 @@ export default {
               }
           },
           callback: function (result) {
-              const data = {
+
+              const resto = {
                 name: $('#rs_name').val(),
                 category: $('#rs_category').val(),
                 specialty: $('#rs_specialty').val(),
@@ -196,33 +204,22 @@ export default {
                 monthly_sales: $('#rs_monhtlySales').val(),
                 daily_sales: $('#rs_dailySales').val(),
                 open_hrs: $('#rs_openhrs').val(),
-                latitude: $('#rs_latitude').val(),
-                longitude: $('#rs_longitude').val(),
+                lat: $('#rs_latitude').val(),
+                long: $('#rs_longitude').val(),
               }
+
              if (result) {
-                self.saveResto(data);
+                self.saveResto(resto);
              }
           }
       });
 
-      this.category.map(obj => {
-        $('#rs_category').append(`<option value="`+ obj.id +`">`+ obj.name +`</option>`)
-      })
-
-      this.specialty.map(obj => {
-        $('#rs_specialty').append(`<option value="`+ obj.id +`">`+ obj.name +`</option>`)
-      })      
       
     },
     saveResto(data){
       axios.post('/api/restaurant', data)
         .then(res => {
-
-            let localData = data;
-            localData.category =  $('#rs_category option:selected').text();
-            localData.specialty = $('#rs_specialty option:selected').text();
-            this.restoList.push(localData);
-
+            this.restoList.push(data);
         }).catch(err => {
         console.log(err)
       })
