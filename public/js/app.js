@@ -1763,6 +1763,8 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var bootbox__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootbox */ "./node_modules/bootbox/dist/bootbox.all.min.js");
+/* harmony import */ var bootbox__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(bootbox__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
@@ -1802,44 +1804,179 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'google-map',
   props: ['name'],
   data: function data() {
     return {
       mapName: this.name + "-map",
-      markerCoordinates: [{
-        latitude: 7.057645,
-        longitude: 125.579810
-      }],
+      search: '',
+      markerCoordinates: [],
       map: null,
       bounds: null,
-      markers: []
+      markers: [],
+      restoList: [],
+      isSelected: false,
+      selectedResto: [],
+      category: [],
+      specialty: []
     };
   },
-  mounted: function mounted() {
-    var _this = this;
-
-    this.bounds = new google.maps.LatLngBounds();
-    var element = document.getElementById(this.mapName);
-    var mapCentre = this.markerCoordinates[0];
-    var options = {
-      center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude)
-    };
-    this.map = new google.maps.Map(element, options);
-    this.markerCoordinates.forEach(function (coord) {
-      var position = new google.maps.LatLng(coord.latitude, coord.longitude);
-      var marker = new google.maps.Marker({
-        position: position,
-        map: _this.map
+  computed: {
+    filteredRestaurants: function filteredRestaurants() {
+      var self = this;
+      var data = this.restoList.filter(function (cust) {
+        return cust.name.toLowerCase().indexOf(self.search.toLowerCase()) >= 0;
       });
+      return data;
+    }
+  },
+  methods: {
+    loadResto: function loadResto() {
+      var _this = this;
 
-      _this.markers.push(marker);
+      axios.get('/api/restaurant').then(function (res) {
+        _this.restoList = res.data; // console.log(this.restoList);
 
-      _this.map.fitBounds(_this.bounds.extend(position));
-    });
+        setTimeout(function () {
+          _this.loadCoordinates(res.data);
+        }, 100);
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
+    loadCoordinates: function loadCoordinates(data) {
+      var _this2 = this;
+
+      var newData = data;
+
+      if (data.length) {
+        data.map(function (obj) {
+          _this2.markerCoordinates.push({
+            latitude: obj.latitude,
+            longitude: obj.longitude
+          });
+        });
+      } else {
+        this.markerCoordinates = [];
+        this.markerCoordinates.push({
+          latitude: newData.latitude,
+          longitude: newData.longitude
+        });
+      } // this.bounds = new google.maps.LatLngBounds();
+      // const element = document.getElementById(this.mapName)
+      // const mapCentre = this.markerCoordinates[0]
+      // const options = {
+      //   center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
+      //   zoom: 10
+      // }
+      // this.map = new google.maps.Map(element, options);
+      // this.markerCoordinates.forEach((coord) => {
+      //   const position = new google.maps.LatLng(coord.latitude, coord.longitude);
+      //   const marker = new google.maps.Marker({ 
+      //     position,
+      //     map: this.map
+      //   });
+      // this.markers.push(marker)
+      //   this.map.fitBounds(this.bounds.extend(position))
+      // });
+
+    },
+    loadnewCoordinates: function loadnewCoordinates(id) {
+      var newCoordinates = this.restoList.find(function (obj) {
+        return obj.id == id;
+      });
+      this.loadCoordinates(newCoordinates);
+      this.selectedResto = newCoordinates;
+      this.isSelected = true;
+    },
+    addNewResto: function addNewResto() {
+      var self = this;
+      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_name\"> Restaurant Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_name\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_category\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_specialty\"> Specialty </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_specialty\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_address\"> Address </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_address\">\n            </div>\n            <div class=\"row\">\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_monhtlySales\"> Monthly Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_monhtlySales\">\n                </div>\n              </div>\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_dailySales\"> Daily Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_dailySales\">\n                </div>\n              </div>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_openhrs\"> Open Hours </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_openhrs\">\n            </div>  \n            <div class=\"form-group\">\n              <label for=\"exampleInputPassword1\"> Coordinates </label>\n              <div class=\"form-inline\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_latitude\" placeholder=\"latitude\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_longitude\" placeholder=\"longitude\" style=\"margin-left:34px\">\n              </div>\n            </div>\n          </form>";
+      bootbox__WEBPACK_IMPORTED_MODULE_0___default.a.confirm({
+        title: "New Restaurant",
+        message: data,
+        buttons: {
+          cancel: {
+            label: '<i class="fa fa-times"></i> Cancel'
+          },
+          confirm: {
+            label: '<i class="fa fa-check" @click="saveResto()"></i> Confirm'
+          }
+        },
+        callback: function callback(result) {
+          var resto = {
+            name: $('#rs_name').val(),
+            category: $('#rs_category').val(),
+            specialty: $('#rs_specialty').val(),
+            address: $('#rs_address').val(),
+            monthly_sales: $('#rs_monhtlySales').val(),
+            daily_sales: $('#rs_dailySales').val(),
+            open_hrs: $('#rs_openhrs').val(),
+            lat: $('#rs_latitude').val(),
+            long: $('#rs_longitude').val()
+          };
+
+          if (result) {
+            self.saveResto(resto);
+          }
+        }
+      });
+    },
+    saveResto: function saveResto(data) {
+      var _this3 = this;
+
+      axios.post('/api/restaurant', data).then(function (res) {
+        _this3.restoList.push(data);
+      }).catch(function (err) {
+        console.log(err);
+      });
+    }
+  },
+  created: function created() {
+    this.loadResto();
   }
 });
+
+/***/ }),
+
+/***/ "./node_modules/bootbox/dist/bootbox.all.min.js":
+/*!******************************************************!*\
+  !*** ./node_modules/bootbox/dist/bootbox.all.min.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
+ * bootbox.js 5.0.0
+ *
+ * http://bootboxjs.com/license.txt
+ */
+!function(e,t){'use strict'; true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js")], __WEBPACK_AMD_DEFINE_FACTORY__ = (t),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):undefined}(this,function t(p,u){'use strict';var r,n,l,i;Object.keys||(Object.keys=(r=Object.prototype.hasOwnProperty,n=!{toString:null}.propertyIsEnumerable('toString'),i=(l=['toString','toLocaleString','valueOf','hasOwnProperty','isPrototypeOf','propertyIsEnumerable','constructor']).length,function(e){if('function'!=typeof e&&('object'!=typeof e||null===e))throw new TypeError('Object.keys called on non-object');var t,o,a=[];for(t in e)r.call(e,t)&&a.push(t);if(n)for(o=0;o<i;o++)r.call(e,l[o])&&a.push(l[o]);return a}));var d={};d.VERSION='5.0.0';var b={},f={dialog:"<div class=\"bootbox modal\" tabindex=\"-1\" role=\"dialog\" aria-hidden=\"true\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-body\"><div class=\"bootbox-body\"></div></div></div></div></div>",header:"<div class=\"modal-header\"><h5 class=\"modal-title\"></h5></div>",footer:'<div class="modal-footer"></div>',closeButton:'<button type="button" class="bootbox-close-button close" aria-hidden="true">&times;</button>',form:'<form class="bootbox-form"></form>',button:'<button type="button" class="btn"></button>',option:'<option></option>',promptMessage:'<div class="bootbox-prompt-message"></div>',inputs:{text:'<input class="bootbox-input bootbox-input-text form-control" autocomplete="off" type="text" />',textarea:'<textarea class="bootbox-input bootbox-input-textarea form-control"></textarea>',email:'<input class="bootbox-input bootbox-input-email form-control" autocomplete="off" type="email" />',select:'<select class="bootbox-input bootbox-input-select form-control"></select>',checkbox:'<div class="form-check checkbox"><label class="form-check-label"><input class="form-check-input bootbox-input bootbox-input-checkbox" type="checkbox" /></label></div>',radio:'<div class="form-check radio"><label class="form-check-label"><input class="form-check-input bootbox-input bootbox-input-radio" type="radio" name="bootbox-radio" /></label></div>',date:'<input class="bootbox-input bootbox-input-date form-control" autocomplete="off" type="date" />',time:'<input class="bootbox-input bootbox-input-time form-control" autocomplete="off" type="time" />',number:'<input class="bootbox-input bootbox-input-number form-control" autocomplete="off" type="number" />',password:'<input class="bootbox-input bootbox-input-password form-control" autocomplete="off" type="password" />',range:'<input class="bootbox-input bootbox-input-range form-control-range" autocomplete="off" type="range" />'}},m={locale:'en',backdrop:'static',animate:!0,className:null,closeButton:!0,show:!0,container:'body',value:'',inputType:'text',swapButtonOrder:!1,centerVertical:!1,multiple:!1};function c(e,t,o){return p.extend(!0,{},e,function(e,t){var o=e.length,a={};if(o<1||2<o)throw new Error('Invalid argument length');return 2===o||'string'==typeof e[0]?(a[t[0]]=e[0],a[t[1]]=e[1]):a=e[0],a}(t,o))}function h(e,t,o,a){var r;a&&a[0]&&(r=a[0].locale||m.locale,(a[0].swapButtonOrder||m.swapButtonOrder)&&(t=t.reverse()));var n,l,i,s={className:'bootbox-'+e,buttons:function(e,t){for(var o={},a=0,r=e.length;a<r;a++){var n=e[a],l=n.toLowerCase(),i=n.toUpperCase();o[l]={label:(s=i,c=t,void 0,p=b[c],p?p[s]:b.en[s])}}var s,c,p;return o}(t,r)};return n=c(s,a,o),i={},O(l=t,function(e,t){i[t]=!0}),O(n.buttons,function(e){if(i[e]===u)throw new Error('button key "'+e+'" is not allowed (options are '+l.join(' ')+')')}),n}function C(e){return Object.keys(e).length}function O(e,o){var a=0;p.each(e,function(e,t){o(e,t,a++)})}function v(e,t,o){e.stopPropagation(),e.preventDefault(),p.isFunction(o)&&!1===o.call(t,e)||t.modal('hide')}function w(e){return/([01][0-9]|2[0-3]):[0-5][0-9]?:[0-5][0-9]/.test(e)}function y(e){return/(\d{4})-(\d{2})-(\d{2})/.test(e)}return d.locales=function(e){return e?b[e]:b},d.addLocale=function(e,o){return p.each(['OK','CANCEL','CONFIRM'],function(e,t){if(!o[t])throw new Error('Please supply a translation for "'+t+'"')}),b[e]={OK:o.OK,CANCEL:o.CANCEL,CONFIRM:o.CONFIRM},d},d.removeLocale=function(e){if('en'===e)throw new Error('"en" is used as the default and fallback locale and cannot be removed.');return delete b[e],d},d.setLocale=function(e){return d.setDefaults('locale',e)},d.setDefaults=function(){var e={};return 2===arguments.length?e[arguments[0]]=arguments[1]:e=arguments[0],p.extend(m,e),d},d.hideAll=function(){return p('.bootbox').modal('hide'),d},d.init=function(e){return t(e||p)},d.dialog=function(e){if(p.fn.modal===u)throw new Error("\"$.fn.modal\" is not defined; please double check you have included the Bootstrap JavaScript library. See http://getbootstrap.com/javascript/ for more details.");if(e=function(r){var n,l;if('object'!=typeof r)throw new Error('Please supply an object of options');if(!r.message)throw new Error('"message" option must not be null or an empty string.');(r=p.extend({},m,r)).buttons||(r.buttons={});return n=r.buttons,l=C(n),O(n,function(e,t,o){if(p.isFunction(t)&&(t=n[e]={callback:t}),'object'!==p.type(t))throw new Error('button with key "'+e+'" must be an object');if(t.label||(t.label=e),!t.className){var a=!1;a=r.swapButtonOrder?0===o:o===l-1,t.className=l<=2&&a?'btn-primary':'btn-secondary btn-default'}}),r}(e),p.fn.modal.Constructor.VERSION){e.fullBootstrapVersion=p.fn.modal.Constructor.VERSION;var t=e.fullBootstrapVersion.indexOf('.');e.bootstrap=e.fullBootstrapVersion.substring(0,t)}else e.bootstrap='2',e.fullBootstrapVersion='2.3.2',console.warn('Bootbox will *mostly* work with Bootstrap 2, but we do not officially support it. Please upgrade, if possible.');var o=p(f.dialog),a=o.find('.modal-dialog'),r=o.find('.modal-body'),n=p(f.header),l=p(f.footer),i=e.buttons,s={onEscape:e.onEscape};if(r.find('.bootbox-body').html(e.message),0<C(e.buttons)&&(O(i,function(e,t){var o=p(f.button);switch(o.data('bb-handler',e),o.addClass(t.className),e){case'ok':case'confirm':o.addClass('bootbox-accept');break;case'cancel':o.addClass('bootbox-cancel')}o.html(t.label),l.append(o),s[e]=t.callback}),r.after(l)),!0===e.animate&&o.addClass('fade'),e.className&&o.addClass(e.className),e.size&&(e.fullBootstrapVersion.substring(0,3)<'3.1'&&console.warn('"size" requires Bootstrap 3.1.0 or higher. You appear to be using '+e.fullBootstrapVersion+'. Please upgrade to use this option.'),'large'===e.size?a.addClass('modal-lg'):'small'===e.size&&a.addClass('modal-sm')),e.title&&(r.before(n),o.find('.modal-title').html(e.title)),e.closeButton){var c=p(f.closeButton);e.title?3<e.bootstrap?o.find('.modal-header').append(c):o.find('.modal-header').prepend(c):c.prependTo(r)}return e.centerVertical&&(e.fullBootstrapVersion<'4.0.0'&&console.warn('"centerVertical" requires Bootstrap 4.0.0-beta.3 or higher. You appear to be using '+e.fullBootstrapVersion+'. Please upgrade to use this option.'),a.addClass('modal-dialog-centered')),o.one('hide.bs.modal',function(e){e.target===this&&(o.off('escape.close.bb'),o.off('click'))}),o.one('hidden.bs.modal',function(e){e.target===this&&o.remove()}),o.one('shown.bs.modal',function(){o.find('.bootbox-accept:first').trigger('focus')}),'static'!==e.backdrop&&o.on('click.dismiss.bs.modal',function(e){o.children('.modal-backdrop').length&&(e.currentTarget=o.children('.modal-backdrop').get(0)),e.target===e.currentTarget&&o.trigger('escape.close.bb')}),o.on('escape.close.bb',function(e){s.onEscape&&v(e,o,s.onEscape)}),o.on('click','.modal-footer button:not(.disabled)',function(e){var t=p(this).data('bb-handler');v(e,o,s[t])}),o.on('click','.bootbox-close-button',function(e){v(e,o,s.onEscape)}),o.on('keyup',function(e){27===e.which&&o.trigger('escape.close.bb')}),p(e.container).append(o),o.modal({backdrop:!!e.backdrop&&'static',keyboard:!1,show:!1}),e.show&&o.modal('show'),o},d.alert=function(){var e;if((e=h('alert',['ok'],['message','callback'],arguments)).callback&&!p.isFunction(e.callback))throw new Error('alert requires the "callback" property to be a function when provided');return e.buttons.ok.callback=e.onEscape=function(){return!p.isFunction(e.callback)||e.callback.call(this)},d.dialog(e)},d.confirm=function(){var e;if(e=h('confirm',['cancel','confirm'],['message','callback'],arguments),!p.isFunction(e.callback))throw new Error('confirm requires a callback');return e.buttons.cancel.callback=e.onEscape=function(){return e.callback.call(this,!1)},e.buttons.confirm.callback=function(){return e.callback.call(this,!0)},d.dialog(e)},d.prompt=function(){var r,t,e,n,o,a;if(e=p(f.form),(r=h('prompt',['cancel','confirm'],['title','callback'],arguments)).value||(r.value=m.value),r.inputType||(r.inputType=m.inputType),o=r.show===u?m.show:r.show,r.show=!1,r.buttons.cancel.callback=r.onEscape=function(){return r.callback.call(this,null)},r.buttons.confirm.callback=function(){var e;if('checkbox'===r.inputType)e=n.find('input:checked').map(function(){return p(this).val()}).get();else if('radio'===r.inputType)e=n.find('input:checked').val();else{if(n[0].checkValidity&&!n[0].checkValidity())return!1;e='select'===r.inputType&&!0===r.multiple?n.find('option:selected').map(function(){return p(this).val()}).get():n.val()}return r.callback.call(this,e)},!r.title)throw new Error('prompt requires a title');if(!p.isFunction(r.callback))throw new Error('prompt requires a callback');if(!f.inputs[r.inputType])throw new Error('Invalid prompt type');switch(n=p(f.inputs[r.inputType]),r.inputType){case'text':case'textarea':case'email':case'password':n.val(r.value),r.placeholder&&n.attr('placeholder',r.placeholder),r.pattern&&n.attr('pattern',r.pattern),r.maxlength&&n.attr('maxlength',r.maxlength),r.required&&n.prop({required:!0});break;case'date':case'time':case'number':case'range':if(n.val(r.value),r.placeholder&&n.attr('placeholder',r.placeholder),r.pattern&&n.attr('pattern',r.pattern),r.required&&n.prop({required:!0}),'date'!==r.inputType&&r.step){if(!('any'===r.step||!isNaN(r.step)&&0<parseInt(r.step)))throw new Error('"step" must be a valid positive number or the value "any". See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-step for more information.');n.attr('step',r.step)}(function(e,t,o){var a=!1,r=!0,n=!0;if('date'===e)t===u||(r=y(t))?o===u||(n=y(o))||console.warn('Browsers which natively support the "date" input type expect date values to be of the form "YYYY-MM-DD" (see ISO-8601 https://www.iso.org/iso-8601-date-and-time-format.html). Bootbox does not enforce this rule, but your max value may not be enforced by this browser.'):console.warn('Browsers which natively support the "date" input type expect date values to be of the form "YYYY-MM-DD" (see ISO-8601 https://www.iso.org/iso-8601-date-and-time-format.html). Bootbox does not enforce this rule, but your min value may not be enforced by this browser.');else if('time'===e){if(t!==u&&!(r=w(t)))throw new Error('"min" is not a valid time. See https://www.w3.org/TR/2012/WD-html-markup-20120315/datatypes.html#form.data.time for more information.');if(o!==u&&!(n=w(o)))throw new Error('"max" is not a valid time. See https://www.w3.org/TR/2012/WD-html-markup-20120315/datatypes.html#form.data.time for more information.')}else{if(t!==u&&isNaN(t))throw new Error('"min" must be a valid number. See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-min for more information.');if(o!==u&&isNaN(o))throw new Error('"max" must be a valid number. See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-max for more information.')}if(r&&n){if(o<=t)throw new Error('"max" must be greater than "min". See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-max for more information.');a=!0}return a})(r.inputType,r.min,r.max)&&(r.min!==u&&n.attr('min',r.min),r.max!==u&&n.attr('max',r.max));break;case'select':var l={};if(a=r.inputOptions||[],!p.isArray(a))throw new Error('Please pass an array of input options');if(!a.length)throw new Error('prompt with "inputType" set to "select" requires at least one option');r.placeholder&&n.attr('placeholder',r.placeholder),r.required&&n.prop({required:!0}),r.multiple&&n.prop({multiple:!0}),O(a,function(e,t){var o=n;if(t.value===u||t.text===u)throw new Error('each option needs a "value" property and a "text" property');t.group&&(l[t.group]||(l[t.group]=p('<optgroup />').attr('label',t.group)),o=l[t.group]);var a=p(f.option);a.attr('value',t.value).text(t.text),o.append(a)}),O(l,function(e,t){n.append(t)}),n.val(r.value);break;case'checkbox':var i=p.isArray(r.value)?r.value:[r.value];if(!(a=r.inputOptions||[]).length)throw new Error('prompt with "inputType" set to "checkbox" requires at least one option');n=p('<div class="bootbox-checkbox-list"></div>'),O(a,function(e,o){if(o.value===u||o.text===u)throw new Error('each option needs a "value" property and a "text" property');var a=p(f.inputs[r.inputType]);a.find('input').attr('value',o.value),a.find('label').append('\n'+o.text),O(i,function(e,t){t===o.value&&a.find('input').prop('checked',!0)}),n.append(a)});break;case'radio':if(r.value!==u&&p.isArray(r.value))throw new Error('prompt with "inputType" set to "radio" requires a single, non-array value for "value"');if(!(a=r.inputOptions||[]).length)throw new Error('prompt with "inputType" set to "radio" requires at least one option');n=p('<div class="bootbox-radiobutton-list"></div>');var s=!0;O(a,function(e,t){if(t.value===u||t.text===u)throw new Error('each option needs a "value" property and a "text" property');var o=p(f.inputs[r.inputType]);o.find('input').attr('value',t.value),o.find('label').append('\n'+t.text),r.value!==u&&t.value===r.value&&(o.find('input').prop('checked',!0),s=!1),n.append(o)}),s&&n.find('input[type="radio"]').first().prop('checked',!0)}if(e.append(n),e.on('submit',function(e){e.preventDefault(),e.stopPropagation(),t.find('.bootbox-accept').trigger('click')}),''!==p.trim(r.message)){var c=p(f.promptMessage).html(r.message);e.prepend(c),r.message=e}else r.message=e;return(t=d.dialog(r)).off('shown.bs.modal'),t.on('shown.bs.modal',function(){n.focus()}),!0===o&&t.modal('show'),t},d.addLocale('en',{OK:'OK',CANCEL:'Cancel',CONFIRM:'OK'}),d}),function(e,t){ true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(/*! bootbox */ "./node_modules/bootbox/dist/bootbox.all.min.js")], __WEBPACK_AMD_DEFINE_FACTORY__ = (t),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):undefined}(this,function(e){e.addLocale('ar',{OK:'موافق',CANCEL:'الغاء',CONFIRM:'تأكيد'}),e.addLocale('az',{OK:'OK',CANCEL:'İmtina et',CONFIRM:'Təsdiq et'}),e.addLocale('bg_BG',{OK:'Ок',CANCEL:'Отказ',CONFIRM:'Потвърждавам'}),e.addLocale('br',{OK:'OK',CANCEL:'Cancelar',CONFIRM:'Sim'}),e.addLocale('cs',{OK:'OK',CANCEL:'Zrušit',CONFIRM:'Potvrdit'}),e.addLocale('da',{OK:'OK',CANCEL:'Annuller',CONFIRM:'Accepter'}),e.addLocale('de',{OK:'OK',CANCEL:'Abbrechen',CONFIRM:'Akzeptieren'}),e.addLocale('el',{OK:'Εντάξει',CANCEL:'Ακύρωση',CONFIRM:'Επιβεβαίωση'}),e.addLocale('en',{OK:'OK',CANCEL:'Cancel',CONFIRM:'OK'}),e.addLocale('es',{OK:'OK',CANCEL:'Cancelar',CONFIRM:'Aceptar'}),e.addLocale('eu',{OK:'OK',CANCEL:'Ezeztatu',CONFIRM:'Onartu'}),e.addLocale('et',{OK:'OK',CANCEL:'Katkesta',CONFIRM:'OK'}),e.addLocale('fa',{OK:'قبول',CANCEL:'لغو',CONFIRM:'تایید'}),e.addLocale('fi',{OK:'OK',CANCEL:'Peruuta',CONFIRM:'OK'}),e.addLocale('fr',{OK:'OK',CANCEL:'Annuler',CONFIRM:'Confirmer'}),e.addLocale('he',{OK:'אישור',CANCEL:'ביטול',CONFIRM:'אישור'}),e.addLocale('hu',{OK:'OK',CANCEL:'Mégsem',CONFIRM:'Megerősít'}),e.addLocale('hr',{OK:'OK',CANCEL:'Odustani',CONFIRM:'Potvrdi'}),e.addLocale('id',{OK:'OK',CANCEL:'Batal',CONFIRM:'OK'}),e.addLocale('it',{OK:'OK',CANCEL:'Annulla',CONFIRM:'Conferma'}),e.addLocale('ja',{OK:'OK',CANCEL:'キャンセル',CONFIRM:'確認'}),e.addLocale('ko',{OK:'OK',CANCEL:'취소',CONFIRM:'확인'}),e.addLocale('lt',{OK:'Gerai',CANCEL:'Atšaukti',CONFIRM:'Patvirtinti'}),e.addLocale('lv',{OK:'Labi',CANCEL:'Atcelt',CONFIRM:'Apstiprināt'}),e.addLocale('nl',{OK:'OK',CANCEL:'Annuleren',CONFIRM:'Accepteren'}),e.addLocale('no',{OK:'OK',CANCEL:'Avbryt',CONFIRM:'OK'}),e.addLocale('pl',{OK:'OK',CANCEL:'Anuluj',CONFIRM:'Potwierdź'}),e.addLocale('pt',{OK:'OK',CANCEL:'Cancelar',CONFIRM:'Confirmar'}),e.addLocale('ru',{OK:'OK',CANCEL:'Отмена',CONFIRM:'Подтвердить'}),e.addLocale('sk',{OK:'OK',CANCEL:'Zrušiť',CONFIRM:'Potvrdiť'}),e.addLocale('sl',{OK:'OK',CANCEL:'Prekliči',CONFIRM:'Potrdi'}),e.addLocale('sq',{OK:'OK',CANCEL:'Anulo',CONFIRM:'Prano'}),e.addLocale('sv',{OK:'OK',CANCEL:'Avbryt',CONFIRM:'OK'}),e.addLocale('th',{OK:'ตกลง',CANCEL:'ยกเลิก',CONFIRM:'ยืนยัน'}),e.addLocale('tr',{OK:'Tamam',CANCEL:'İptal',CONFIRM:'Onayla'}),e.addLocale('uk',{OK:'OK',CANCEL:'Відміна',CONFIRM:'Прийняти'}),e.addLocale('zh_CN',{OK:'OK',CANCEL:'取消',CONFIRM:'确认'}),e.addLocale('zh_TW',{OK:'OK',CANCEL:'取消',CONFIRM:'確認'})});
 
 /***/ }),
 
@@ -6300,7 +6437,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\n", ""]);
+exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\nspan#add_resto[data-v-47a78f6f] {\n    float: right;\n    margin-top: -31px;\n    color: green;\n}\ndiv#sales_div[data-v-47a78f6f] {\n  margin-top: 38px;\n}\n", ""]);
 
 // exports
 
@@ -37572,98 +37709,168 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c(
-      "form",
-      {
-        staticClass: "mb-3 form-inline",
-        on: {
-          submit: function($event) {
-            $event.preventDefault()
-            return _vm.addArticle($event)
-          }
-        }
-      },
-      [
-        _vm._m(0),
-        _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-primary col-md-2",
-            attrs: { type: "submit" }
-          },
-          [_vm._v(" Submit ")]
-        )
-      ]
-    ),
-    _vm._v(" "),
     _c("div", { staticClass: "container" }, [
       _c("div", { staticClass: "row" }, [
-        _vm._m(1),
+        _c("div", { staticClass: "col-md-4 " }, [
+          _c("div", { staticClass: "form-group" }, [
+            _c(
+              "label",
+              { staticClass: "sr-only", attrs: { for: "restaurant_name" } },
+              [_vm._v(" Restaurant name ")]
+            ),
+            _vm._v(" "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.search,
+                  expression: "search"
+                }
+              ],
+              staticClass: "form-control",
+              staticStyle: { width: "100%" },
+              attrs: {
+                type: "text",
+                id: "restaurant_name",
+                placeholder: "name"
+              },
+              domProps: { value: _vm.search },
+              on: {
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.search = $event.target.value
+                }
+              }
+            })
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group" }, [
+            _c("h3", [_vm._v(" List ")]),
+            _vm._v(" "),
+            _c("span", {
+              staticClass: "fa fa-plus",
+              attrs: { id: "add_resto" },
+              on: {
+                click: function($event) {
+                  return _vm.addNewResto()
+                }
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "ul",
+              { staticClass: "list-group list-group-flush" },
+              _vm._l(_vm.filteredRestaurants, function(item) {
+                return _c(
+                  "li",
+                  {
+                    key: item.id,
+                    staticClass: "list-group-item",
+                    on: {
+                      click: function($event) {
+                        return _vm.loadnewCoordinates(item.id)
+                      }
+                    }
+                  },
+                  [
+                    _c("a", { attrs: { href: "#" } }, [
+                      _vm._v(" " + _vm._s(item.name) + " ")
+                    ])
+                  ]
+                )
+              }),
+              0
+            )
+          ])
+        ]),
         _vm._v(" "),
         _c("div", { staticClass: "col-md-8" }, [
-          _c("h3", [_vm._v(" Location ")]),
+          _c("div", { staticClass: "form-group" }, [
+            _c("h3", [_vm._v(" Map ")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "google-map", attrs: { id: _vm.mapName } })
+          ]),
           _vm._v(" "),
-          _c("div", { staticClass: "google-map", attrs: { id: _vm.mapName } })
+          _vm.isSelected
+            ? _c("div", { staticClass: "form-group" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-8" }, [
+                    _c("h5", [
+                      _vm._v(" " + _vm._s(_vm.selectedResto.name) + " ")
+                    ]),
+                    _vm._v(" "),
+                    _c("label", [
+                      _c("b", [_vm._v(" Address :")]),
+                      _vm._v(" "),
+                      _c("span", [
+                        _vm._v(_vm._s(_vm.selectedResto.address) + " ")
+                      ])
+                    ]),
+                    _c("br"),
+                    _vm._v(" "),
+                    _c("label", [
+                      _c("b", [_vm._v("Category :")]),
+                      _vm._v(" "),
+                      _c("span", [
+                        _vm._v(" " + _vm._s(_vm.selectedResto.category))
+                      ])
+                    ]),
+                    _c("br"),
+                    _vm._v(" "),
+                    _c("label", [
+                      _c("b", [_vm._v("Specialty :")]),
+                      _vm._v(" "),
+                      _c("span", [
+                        _vm._v(" " + _vm._s(_vm.selectedResto.specialty) + " ")
+                      ])
+                    ]),
+                    _c("br"),
+                    _vm._v(" "),
+                    _c("label", [
+                      _c("b", [_vm._v("Open Hours :")]),
+                      _vm._v(" "),
+                      _c("span", [
+                        _vm._v(" " + _vm._s(_vm.selectedResto.open_hrs) + " ")
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "col-md-4", attrs: { id: "sales_div" } },
+                    [
+                      _c("h5", [_vm._v(" Sales ")]),
+                      _vm._v(" "),
+                      _c("label", [
+                        _c("b", [_vm._v("Daily :")]),
+                        _vm._v(" "),
+                        _c("span", [
+                          _vm._v(" " + _vm._s(_vm.selectedResto.daily_sales))
+                        ])
+                      ]),
+                      _c("br"),
+                      _vm._v(" "),
+                      _c("label", [
+                        _c("b", [_vm._v("Monthly :")]),
+                        _vm._v(" "),
+                        _c("span", [
+                          _vm._v(_vm._s(_vm.selectedResto.monthly_sales) + " ")
+                        ])
+                      ])
+                    ]
+                  )
+                ])
+              ])
+            : _vm._e()
         ])
       ])
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "form-group mx-sm-10 col-md-10" }, [
-      _c(
-        "label",
-        { staticClass: "sr-only", attrs: { for: "restaurant_name" } },
-        [_vm._v(" Restaurant name ")]
-      ),
-      _vm._v(" "),
-      _c("input", {
-        staticClass: "form-control",
-        staticStyle: { width: "100%" },
-        attrs: { type: "text", id: "restaurant_name", placeholder: "name" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-md-4 " }, [
-      _c("h3", [_vm._v(" List ")]),
-      _vm._v(" "),
-      _c("ul", { staticClass: "list-group list-group-flush" }, [
-        _c("li", { staticClass: "list-group-item" }, [
-          _c("a", { attrs: { href: "#" } }, [_vm._v(" Cras justo odio ")])
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _c("a", { attrs: { href: "#" } }, [
-            _vm._v(" Dapibus ac facilisis in ")
-          ])
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _c("a", { attrs: { href: "#" } }, [_vm._v(" Morbi leo risus ")])
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _c("a", { attrs: { href: "#" } }, [
-            _vm._v(" Porta ac consectetur ac ")
-          ])
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _c("a", { attrs: { href: "#" } }, [_vm._v(" Vestibulum at eros ")])
-        ])
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -49832,8 +50039,7 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 
 Vue.component('app-navbar', __webpack_require__(/*! ./components/Navbar.vue */ "./resources/js/components/Navbar.vue").default);
-Vue.component('app-restaurant', __webpack_require__(/*! ./components/Retaurant.vue */ "./resources/js/components/Retaurant.vue").default); // Vue.component('google-map', require('./components/GoogleMap.vue').default);
-
+Vue.component('app-restaurant', __webpack_require__(/*! ./components/Retaurant.vue */ "./resources/js/components/Retaurant.vue").default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
