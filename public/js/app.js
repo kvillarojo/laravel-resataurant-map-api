@@ -1820,6 +1820,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'google-map',
@@ -1834,7 +1835,9 @@ __webpack_require__.r(__webpack_exports__);
       markers: [],
       restoList: [],
       isSelected: false,
-      selectedResto: []
+      selectedResto: [],
+      category: [],
+      specialty: []
     };
   },
   computed: {
@@ -1851,7 +1854,8 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.get('/api/restaurant').then(function (res) {
-        _this.restoList = res.data;
+        _this.restoList = res.data; // console.log(this.restoList);
+
         setTimeout(function () {
           _this.loadCoordinates(res.data);
         }, 100);
@@ -1905,7 +1909,8 @@ __webpack_require__.r(__webpack_exports__);
       this.isSelected = true;
     },
     addNewResto: function addNewResto() {
-      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_name\"> Restaurant Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_name\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_category\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_specialty\"> Specialty </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_specialty\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_contact\"> Contact: </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_contact\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_email\"> Email </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_email\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_address\"> Address </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_address\">\n              <small class=\"form-text text-muted\">We'll never share your email with anyone else.</small>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_openhrs\"> Open Hours </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_openhrs\">\n            </div>  \n            <div class=\"form-group\">\n              <label for=\"exampleInputPassword1\"> Coordinates </label>\n              <div class=\"form-inline\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_latitude\" placeholder=\"latitude\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_longitude\" placeholder=\"longitude\">\n              </div>\n            </div>\n\n          </form>";
+      var self = this;
+      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_name\"> Restaurant Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_name\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_category\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_specialty\"> Specialty </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_specialty\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_address\"> Address </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_address\">\n            </div>\n            <div class=\"row\">\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_monhtlySales\"> Monthly Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_monhtlySales\">\n                </div>\n              </div>\n              <div class=\"col-md-6\">\n                <div class=\"form-group\">\n                  <label for=\"rs_dailySales\"> Daily Sales </label>\n                  <input type=\"text\" class=\"form-control\" id=\"rs_dailySales\">\n                </div>\n              </div>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_openhrs\"> Open Hours </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_openhrs\">\n            </div>  \n            <div class=\"form-group\">\n              <label for=\"exampleInputPassword1\"> Coordinates </label>\n              <div class=\"form-inline\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_latitude\" placeholder=\"latitude\">\n                <input type=\"number\" class=\"form-control\" id=\"rs_longitude\" placeholder=\"longitude\" style=\"margin-left:34px\">\n              </div>\n            </div>\n          </form>";
       bootbox__WEBPACK_IMPORTED_MODULE_0___default.a.confirm({
         title: "New Restaurant",
         message: data,
@@ -1914,12 +1919,35 @@ __webpack_require__.r(__webpack_exports__);
             label: '<i class="fa fa-times"></i> Cancel'
           },
           confirm: {
-            label: '<i class="fa fa-check"></i> Confirm'
+            label: '<i class="fa fa-check" @click="saveResto()"></i> Confirm'
           }
         },
         callback: function callback(result) {
-          console.log('This was logged in the callback: ' + result);
+          var resto = {
+            name: $('#rs_name').val(),
+            category: $('#rs_category').val(),
+            specialty: $('#rs_specialty').val(),
+            address: $('#rs_address').val(),
+            monthly_sales: $('#rs_monhtlySales').val(),
+            daily_sales: $('#rs_dailySales').val(),
+            open_hrs: $('#rs_openhrs').val(),
+            lat: $('#rs_latitude').val(),
+            long: $('#rs_longitude').val()
+          };
+
+          if (result) {
+            self.saveResto(resto);
+          }
         }
+      });
+    },
+    saveResto: function saveResto(data) {
+      var _this3 = this;
+
+      axios.post('/api/restaurant', data).then(function (res) {
+        _this3.restoList.push(data);
+      }).catch(function (err) {
+        console.log(err);
       });
     }
   },
@@ -6409,7 +6437,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\nspan#add_resto[data-v-47a78f6f] {\n    float: right;\n    margin-top: -31px;\n    color: green;\n}\ndiv#sales_div[data-v-47a78f6f] {\n  margin-top: 38px;\n}\ninput#rs_longitude[data-v-47a78f6f] {\n  margin-left: 35px;\n}\ninput#rs_longitude[data-v-47a78f6f] {\n    margin-left: 33px;\n}\n\n", ""]);
+exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\nspan#add_resto[data-v-47a78f6f] {\n    float: right;\n    margin-top: -31px;\n    color: green;\n}\ndiv#sales_div[data-v-47a78f6f] {\n  margin-top: 38px;\n}\n", ""]);
 
 // exports
 
@@ -37787,7 +37815,7 @@ var render = function() {
                       _c("b", [_vm._v("Category :")]),
                       _vm._v(" "),
                       _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.Category))
+                        _vm._v(" " + _vm._s(_vm.selectedResto.category))
                       ])
                     ]),
                     _c("br"),
@@ -37796,7 +37824,7 @@ var render = function() {
                       _c("b", [_vm._v("Specialty :")]),
                       _vm._v(" "),
                       _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.Specialty) + " ")
+                        _vm._v(" " + _vm._s(_vm.selectedResto.specialty) + " ")
                       ])
                     ]),
                     _c("br"),
@@ -37805,7 +37833,7 @@ var render = function() {
                       _c("b", [_vm._v("Open Hours :")]),
                       _vm._v(" "),
                       _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.openHourse) + " ")
+                        _vm._v(" " + _vm._s(_vm.selectedResto.open_hrs) + " ")
                       ])
                     ])
                   ]),
@@ -37820,7 +37848,7 @@ var render = function() {
                         _c("b", [_vm._v("Daily :")]),
                         _vm._v(" "),
                         _c("span", [
-                          _vm._v(" " + _vm._s(_vm.selectedResto.daily))
+                          _vm._v(" " + _vm._s(_vm.selectedResto.daily_sales))
                         ])
                       ]),
                       _c("br"),
@@ -37829,7 +37857,7 @@ var render = function() {
                         _c("b", [_vm._v("Monthly :")]),
                         _vm._v(" "),
                         _c("span", [
-                          _vm._v(_vm._s(_vm.selectedResto.monthly) + " ")
+                          _vm._v(_vm._s(_vm.selectedResto.monthly_sales) + " ")
                         ])
                       ])
                     ]

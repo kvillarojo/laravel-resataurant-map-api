@@ -19,7 +19,8 @@
                   </div>
                   <div class="form-group">
                     <h3> List </h3>
-                    <span class="fa fa-plus" id="add_resto" @click="addNewResto()"></span>
+                    <span class="fa fa-plus" id="add_resto" @click="addNewResto()"
+                    ></span>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item" v-for="item in filteredRestaurants"  :key="item.id" @click="loadnewCoordinates(item.id)"> <a href="#"> {{ item.name }} </a> </li>
                     </ul>
@@ -29,6 +30,7 @@
                     <div class="form-group">
                       <h3> Map </h3>
                       <div class="google-map" :id="mapName"></div>
+
                     </div>   
                     <div class="form-group" v-if="isSelected">
                         <!-- <h3>Restaurant Details</h3> -->
@@ -36,21 +38,20 @@
                           <div class="col-md-8">
                             <h5> {{ selectedResto.name }} </h5>
                             <label> <b> Address :</b> <span>{{ selectedResto.address }} </span> </label><br>
-                            <label> <b>Category :</b> <span> {{ selectedResto.Category }}</span></label><br>
-                            <label> <b>Specialty :</b> <span> {{ selectedResto.Specialty }} </span></label><br>
-                            <label> <b>Open Hours :</b> <span> {{ selectedResto.openHourse }} </span></label>
+                            <label> <b>Category :</b> <span> {{ selectedResto.category }}</span></label><br>
+                            <label> <b>Specialty :</b> <span> {{ selectedResto.specialty }} </span></label><br>
+                            <label> <b>Open Hours :</b> <span> {{ selectedResto.open_hrs }} </span></label>
                           </div>
                           <div class="col-md-4" id="sales_div">
                             <h5> Sales </h5>
-                              <label> <b>Daily :</b> <span> {{ selectedResto.daily }}</span></label><br>
-                              <label> <b>Monthly :</b> <span>{{ selectedResto.monthly }} </span> </label>
+                              <label> <b>Daily :</b> <span> {{ selectedResto.daily_sales }}</span></label><br>
+                              <label> <b>Monthly :</b> <span>{{ selectedResto.monthly_sales }} </span> </label>
                           </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
 	</div>
 </template>
 <script>
@@ -68,7 +69,9 @@ export default {
       markers: [],
       restoList: [],
       isSelected: false,
-      selectedResto: []
+      selectedResto: [],
+      category: [],
+      specialty: []
     }
   },
   computed:
@@ -85,6 +88,7 @@ export default {
         axios.get('/api/restaurant')
           .then(res => {
             this.restoList = res.data
+            // console.log(this.restoList);
             setTimeout(() => {
               this.loadCoordinates(res.data);
             }, 100);
@@ -132,37 +136,39 @@ export default {
 
     },
     addNewResto(){
+      const self = this;
+
       const data  = `
           <form>
             <div class="form-group">
               <label for="rs_name"> Restaurant Name </label>
               <input type="text" class="form-control" id="rs_name">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
             </div>
             <div class="form-group">
               <label for="rs_category"> Category </label>
               <input type="text" class="form-control" id="rs_category">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
             </div>
             <div class="form-group">
               <label for="rs_specialty"> Specialty </label>
               <input type="text" class="form-control" id="rs_specialty">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
-            </div>
-            <div class="form-group">
-              <label for="rs_contact"> Contact: </label>
-              <input type="text" class="form-control" id="rs_contact">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
-            </div>
-            <div class="form-group">
-              <label for="rs_email"> Email </label>
-              <input type="text" class="form-control" id="rs_email">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
             </div>
             <div class="form-group">
               <label for="rs_address"> Address </label>
               <input type="text" class="form-control" id="rs_address">
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="rs_monhtlySales"> Monthly Sales </label>
+                  <input type="text" class="form-control" id="rs_monhtlySales">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="rs_dailySales"> Daily Sales </label>
+                  <input type="text" class="form-control" id="rs_dailySales">
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label for="rs_openhrs"> Open Hours </label>
@@ -172,10 +178,9 @@ export default {
               <label for="exampleInputPassword1"> Coordinates </label>
               <div class="form-inline">
                 <input type="number" class="form-control" id="rs_latitude" placeholder="latitude">
-                <input type="number" class="form-control" id="rs_longitude" placeholder="longitude">
+                <input type="number" class="form-control" id="rs_longitude" placeholder="longitude" style="margin-left:34px">
               </div>
             </div>
-
           </form>`;  
 
       bootbox.confirm({
@@ -186,14 +191,40 @@ export default {
                   label: '<i class="fa fa-times"></i> Cancel'
               },
               confirm: {
-                  label: '<i class="fa fa-check"></i> Confirm'
+                  label: '<i class="fa fa-check" @click="saveResto()"></i> Confirm'
               }
           },
           callback: function (result) {
-              console.log('This was logged in the callback: ' + result);
+
+              const resto = {
+                name: $('#rs_name').val(),
+                category: $('#rs_category').val(),
+                specialty: $('#rs_specialty').val(),
+                address: $('#rs_address').val(),
+                monthly_sales: $('#rs_monhtlySales').val(),
+                daily_sales: $('#rs_dailySales').val(),
+                open_hrs: $('#rs_openhrs').val(),
+                lat: $('#rs_latitude').val(),
+                long: $('#rs_longitude').val(),
+              }
+
+             if (result) {
+                self.saveResto(resto);
+             }
           }
       });
+
+      
+    },
+    saveResto(data){
+      axios.post('/api/restaurant', data)
+        .then(res => {
+            this.restoList.push(data);
+        }).catch(err => {
+        console.log(err)
+      })
     }
+
   },
   created(){
     this.loadResto()
@@ -218,12 +249,4 @@ export default {
   div#sales_div {
     margin-top: 38px;
   }
-  input#rs_longitude {
-    margin-left: 35px;
-  }
-
-  input#rs_longitude {
-      margin-left: 33px;
-  }
-
 </style>
