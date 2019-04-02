@@ -1812,6 +1812,67 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'google-map',
@@ -1828,7 +1889,10 @@ __webpack_require__.r(__webpack_exports__);
       isSelected: false,
       selectedResto: [],
       category: [],
-      specialty: []
+      specialty: [],
+      setID: null,
+      daily_sales: 0,
+      monthly_sales: 0
     };
   },
   computed: {
@@ -1845,12 +1909,14 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.get('/api/restaurant').then(function (res) {
-        _this.restoList = res.data.resto;
+        _this.restoList = res.data.resto; // console.log(this.restoList)
+
         _this.category = res.data.categories;
         _this.specialty = res.data.specialty; // console.log(this.restoList);
-        // setTimeout(() => {
-        //   this.loadCoordinates(res.data.resto);
-        // }, 100);
+
+        setTimeout(function () {
+          _this.loadCoordinates(res.data.resto);
+        }, 100);
       }).catch(function (err) {
         console.log(err);
       });
@@ -1858,47 +1924,79 @@ __webpack_require__.r(__webpack_exports__);
     loadCoordinates: function loadCoordinates(data) {
       var _this2 = this;
 
+      var self = this;
       var newData = data;
 
       if (data.length) {
         data.map(function (obj) {
           _this2.markerCoordinates.push({
             latitude: obj.latitude,
-            longitude: obj.longitude
+            longitude: obj.longitude,
+            name: obj.name,
+            address: obj.address,
+            special: obj.specialty,
+            category: obj.category
           });
         });
       } else {
         this.markerCoordinates = [];
         this.markerCoordinates.push({
           latitude: newData.latitude,
-          longitude: newData.longitude
+          longitude: newData.longitude,
+          name: newData.name,
+          address: newData.addresss,
+          special: newData.specialty,
+          category: newData.category
         });
       } // this.bounds = new google.maps.LatLngBounds();
       // const element = document.getElementById(this.mapName)
       // const mapCentre = this.markerCoordinates[0]
       // const options = {
       //   center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
-      //   zoom: 10
+      //   zoom: 4
       // }
       // this.map = new google.maps.Map(element, options);
       // this.markerCoordinates.forEach((coord) => {
       //   const position = new google.maps.LatLng(coord.latitude, coord.longitude);
       //   const marker = new google.maps.Marker({ 
       //     position,
-      //     map: this.map
+      //     map: this.map,
+      //     title: coord.name
+      //   });
+      //   const contentString = 
+      //     `<div id="content">
+      //       <div id="siteNotice">
+      //       </div>
+      //       <h4 id="firstHeading" class="firstHeading">` + coord.name  +`</h4>
+      //       <div id="bodyContent">
+      //        <p><strong>Special:</strong> `+  coord.special + `</p>
+      //        <p><strong>Category: </strong>`+  coord.category + `</p><br>
+      //       <p><strong>Latiude:  </strong>`+ coord.latitude + ` <span style="float: right; margin-left:10px"> <strong>Longitude: </strong> ` + coord.longitude + ` </p>
+      //       </div>
+      //   </div>`;  
+      //   const infowindow = new google.maps.InfoWindow({
+      //     content: contentString
+      //   });
+      //   marker.addListener('mouseover', function() {       
+      //       infowindow.open(this.map, marker);
+      //   });
+      //   marker.addListener('mouseout', function() {       
+      //       infowindow.close();
       //   });
       // this.markers.push(marker)
       //   this.map.fitBounds(this.bounds.extend(position))
-      // });
+      // });  
 
     },
     loadnewCoordinates: function loadnewCoordinates(id) {
+      this.setID = id;
       var newCoordinates = this.restoList.find(function (obj) {
         return obj.id == id;
       });
       this.loadCoordinates(newCoordinates);
       this.selectedResto = newCoordinates;
       this.isSelected = true;
+      this.getSales(id);
     },
     addNewResto: function addNewResto() {
       var self = this;
@@ -1948,6 +2046,51 @@ __webpack_require__.r(__webpack_exports__);
         localData.specialty = $('#rs_specialty option:selected').text();
 
         _this3.restoList.push(localData);
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
+    createNewMenu: function createNewMenu() {
+      var self = this;
+      var data = "\n          <form>\n            <div class=\"form-group\">\n              <label for=\"rs_menu\"> Item Name </label>\n              <input type=\"text\" class=\"form-control\" id=\"rs_menu\">\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_category\"> Category </label>\n              <select name=\"menu_category\" class=\"form-control\" id=\"rs_category\">\n                <option id=\"0\"> Drinks </option>\n                <option id=\"1\"> Appetizer </option>\n                <option id=\"2\"> Fish and Shellfish </option>\n                <option id=\"3\"> Meat and Poultry </option>\n                <option id=\"4\"> Side Dish </option>\n                <option id=\"5\"> Cheese </option>\n              </select>\n            </div>\n            <div class=\"form-group\">\n              <label for=\"rs_price\"> Price </label>\n              <input type=\"number\" class=\"form-control\" id=\"rs_price\">\n            </div>\n          </form>";
+      bootbox__WEBPACK_IMPORTED_MODULE_0___default.a.confirm({
+        title: "Add Item",
+        message: data,
+        buttons: {
+          cancel: {
+            label: '<i class="fa fa-times"></i> Cancel'
+          },
+          confirm: {
+            label: '<i class="fa fa-check" @click="saveResto()"></i> Confirm'
+          }
+        },
+        callback: function callback(result) {
+          var data = {
+            name: $('#rs_menu').val(),
+            menu_category: $("#rs_category option:selected").attr('id'),
+            price: $('#rs_price').val(),
+            restoID: self.setID
+          };
+
+          if (result) {
+            self.saveNewMenu(data);
+          }
+        }
+      });
+    },
+    saveNewMenu: function saveNewMenu(data) {
+      axios.post('/api/restaurant/menu', data).then(function (res) {
+        console.log(res.data);
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
+    getSales: function getSales(id) {
+      var _this4 = this;
+
+      axios.get("api/restaurant/sales/".concat(id)).then(function (res) {
+        _this4.daily_sales = res.data[0].daily_sales;
+        _this4.monthly_sales = res.data[0].monthly_sales; // console.log(res.data[0])
       }).catch(function (err) {
         console.log(err);
       });
@@ -6439,7 +6582,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\nspan#add_resto[data-v-47a78f6f] {\n    float: right;\n    margin-top: -31px;\n    color: green;\n}\ndiv#sales_div[data-v-47a78f6f] {\n  margin-top: 38px;\n}\n", ""]);
+exports.push([module.i, "\n.google-map[data-v-47a78f6f] {\n  width: 100%;\n  height: 600px;\n  margin: 0 auto;\n  background: gray;\n}\nspan#add_resto[data-v-47a78f6f] {\n    float: right;\n    margin-top: -31px;\n    color: green;\n}\ndiv#sales_div[data-v-47a78f6f] {\n  margin-top: 38px;\n}\nbutton#add_to_cart[data-v-47a78f6f] {\n    margin-right: 4px;\n}\n", ""]);
 
 // exports
 
@@ -37790,89 +37933,324 @@ var render = function() {
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "form-group" }, [
-            _c("h3", [_vm._v(" Map ")]),
-            _vm._v(" "),
-            _c("div", { staticClass: "google-map", attrs: { id: _vm.mapName } })
-          ]),
+          _c(
+            "ul",
+            {
+              staticClass: "nav nav-tabs",
+              attrs: { id: "myTab", role: "tablist" }
+            },
+            [
+              _vm._m(0),
+              _vm._v(" "),
+              false
+                ? undefined
+                : _vm._e()
+            ]
+          ),
           _vm._v(" "),
-          _vm.isSelected
-            ? _c("div", { staticClass: "form-group" }, [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "col-md-8" }, [
-                    _c("h5", [
-                      _vm._v(" " + _vm._s(_vm.selectedResto.name) + " ")
-                    ]),
-                    _vm._v(" "),
-                    _c("label", [
-                      _c("b", [_vm._v(" Address :")]),
-                      _vm._v(" "),
-                      _c("span", [
-                        _vm._v(_vm._s(_vm.selectedResto.address) + " ")
-                      ])
-                    ]),
+          _c(
+            "div",
+            { staticClass: "tab-content", attrs: { id: "myTabContent" } },
+            [
+              _c(
+                "div",
+                {
+                  staticClass: "tab-pane fade show active",
+                  attrs: {
+                    id: "home",
+                    role: "tabpanel",
+                    "aria-labelledby": "home-tab"
+                  }
+                },
+                [
+                  _c("div", { staticClass: "form-group" }, [
                     _c("br"),
                     _vm._v(" "),
-                    _c("label", [
-                      _c("b", [_vm._v("Category :")]),
-                      _vm._v(" "),
-                      _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.category))
-                      ])
-                    ]),
-                    _c("br"),
+                    _c("h3", [_vm._v(" Map ")]),
                     _vm._v(" "),
-                    _c("label", [
-                      _c("b", [_vm._v("Specialty :")]),
-                      _vm._v(" "),
-                      _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.specialty) + " ")
-                      ])
-                    ]),
-                    _c("br"),
-                    _vm._v(" "),
-                    _c("label", [
-                      _c("b", [_vm._v("Open Hours :")]),
-                      _vm._v(" "),
-                      _c("span", [
-                        _vm._v(" " + _vm._s(_vm.selectedResto.open_hrs) + " ")
-                      ])
-                    ])
+                    _c("div", {
+                      staticClass: "google-map",
+                      attrs: { id: _vm.mapName }
+                    })
                   ]),
                   _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "col-md-4", attrs: { id: "sales_div" } },
-                    [
-                      _c("h5", [_vm._v(" Sales ")]),
-                      _vm._v(" "),
-                      _c("label", [
-                        _c("b", [_vm._v("Daily :")]),
-                        _vm._v(" "),
-                        _c("span", [
-                          _vm._v(" " + _vm._s(_vm.selectedResto.daily_sales))
-                        ])
-                      ]),
-                      _c("br"),
-                      _vm._v(" "),
-                      _c("label", [
-                        _c("b", [_vm._v("Monthly :")]),
-                        _vm._v(" "),
-                        _c("span", [
-                          _vm._v(_vm._s(_vm.selectedResto.monthly_sales) + " ")
+                  _vm.isSelected
+                    ? _c("div", { staticClass: "form-group" }, [
+                        _c("div", { staticClass: "row" }, [
+                          _c("div", { staticClass: "col-md-8" }, [
+                            _c("h5", [
+                              _vm._v(" " + _vm._s(_vm.selectedResto.name) + " ")
+                            ]),
+                            _vm._v(" "),
+                            _c("label", [
+                              _c("b", [_vm._v(" Address :")]),
+                              _vm._v(" "),
+                              _c("span", [
+                                _vm._v(_vm._s(_vm.selectedResto.address) + " ")
+                              ])
+                            ]),
+                            _c("br"),
+                            _vm._v(" "),
+                            _c("label", [
+                              _c("b", [_vm._v("Category :")]),
+                              _vm._v(" "),
+                              _c("span", [
+                                _vm._v(" " + _vm._s(_vm.selectedResto.category))
+                              ])
+                            ]),
+                            _c("br"),
+                            _vm._v(" "),
+                            _c("label", [
+                              _c("b", [_vm._v("Specialty :")]),
+                              _vm._v(" "),
+                              _c("span", [
+                                _vm._v(
+                                  " " +
+                                    _vm._s(_vm.selectedResto.specialty) +
+                                    " "
+                                )
+                              ])
+                            ]),
+                            _c("br"),
+                            _vm._v(" "),
+                            _c("label", [
+                              _c("b", [_vm._v("Open Hours :")]),
+                              _vm._v(" "),
+                              _c("span", [
+                                _vm._v(
+                                  " " + _vm._s(_vm.selectedResto.open_hrs) + " "
+                                )
+                              ])
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-md-4",
+                              attrs: { id: "sales_div" }
+                            },
+                            [
+                              _c("h5", [_vm._v(" Sales ")]),
+                              _vm._v(" "),
+                              _c("label", [
+                                _c("b", [_vm._v("Daily :")]),
+                                _vm._v(" "),
+                                _c("span", [
+                                  _vm._v(" " + _vm._s(_vm.daily_sales))
+                                ])
+                              ]),
+                              _c("br"),
+                              _vm._v(" "),
+                              _c("label", [
+                                _c("b", [_vm._v("Monthly :")]),
+                                _vm._v(" "),
+                                _c("span", [
+                                  _vm._v(_vm._s(_vm.monthly_sales) + " ")
+                                ])
+                              ])
+                            ]
+                          )
                         ])
                       ])
-                    ]
-                  )
-                ])
-              ])
-            : _vm._e()
+                    : _vm._e()
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                {
+                  staticClass: "tab-pane fade",
+                  attrs: {
+                    id: "profile",
+                    role: "tabpanel",
+                    "aria-labelledby": "profile-tab"
+                  }
+                },
+                [
+                  _c("div", { staticClass: "row" }, [
+                    _c(
+                      "div",
+                      {
+                        staticClass: "col-md-12",
+                        staticStyle: { "margin-top": "25px" }
+                      },
+                      [
+                        _c("h4", [_vm._v("Menu")]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          {
+                            staticClass: "form-inline",
+                            staticStyle: {
+                              float: "right",
+                              "margin-top": "-34px",
+                              "font-size": "21px"
+                            }
+                          },
+                          [
+                            _vm._m(2),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-success",
+                                attrs: { id: "add_menu" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.createNewMenu()
+                                  }
+                                }
+                              },
+                              [
+                                _c("i", {
+                                  staticClass: "fa fa-plus",
+                                  staticStyle: { color: "green" }
+                                })
+                              ]
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(3)
+                ]
+              )
+            ]
+          )
         ])
       ])
     ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "nav-item" }, [
+      _c(
+        "a",
+        {
+          staticClass: "nav-link active",
+          attrs: {
+            id: "home-tab",
+            "data-toggle": "tab",
+            href: "#home",
+            role: "tab",
+            "aria-controls": "home",
+            "aria-selected": "true"
+          }
+        },
+        [_vm._v(" Details ")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "a",
+      {
+        staticClass: "nav-link",
+        attrs: {
+          id: "profile-tab",
+          "data-toggle": "tab",
+          href: "#profile",
+          role: "tab",
+          "aria-controls": "profile",
+          "aria-selected": "false"
+        }
+      },
+      [_c("i", { staticClass: "fa fa-cart-plus" }), _vm._v(" Menu ")]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      { staticClass: "btn btn-primary", attrs: { id: "add_to_cart" } },
+      [_c("i", { staticClass: "fa fa-cart-plus" })]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-sm-12 col-sm-8 col-md-4" }, [
+        _c("div", { staticClass: "card", staticStyle: { width: "100%" } }, [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }),
+            _vm._v(" "),
+            _c("h6", { staticClass: "cadr-subtitle mb-2 text-muted" }, [
+              _vm._v(" Card subtitle ")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _vm._v(
+                "Some quick example text to build on the card title and make up the bulk of the card's content."
+              )
+            ]),
+            _vm._v(" "),
+            _c("a", { staticClass: "card-link", attrs: { href: "#" } }, [
+              _vm._v(" Add to cart ")
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-sm-12 col-sm-8 col-md-4" }, [
+        _c("div", { staticClass: "card", staticStyle: { width: "100%" } }, [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }),
+            _vm._v(" "),
+            _c("h6", { staticClass: "card-subtitle mb-2 text-muted" }, [
+              _vm._v("Card subtitle")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _vm._v(
+                "Some quick example text to build on the card title and make up the bulk of the card's content."
+              )
+            ]),
+            _vm._v(" "),
+            _c("a", { staticClass: "card-link", attrs: { href: "#" } }, [
+              _vm._v(" Add to cart ")
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-sm-12 col-sm-8 col-md-4" }, [
+        _c("div", { staticClass: "card", staticStyle: { width: "100%" } }, [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }),
+            _vm._v(" "),
+            _c("h6", { staticClass: "card-subtitle mb-2 text-muted" }, [
+              _vm._v("Card subtitle")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _vm._v(
+                "Some quick example text to build on the card title and make up the bulk of the card's content."
+              )
+            ]),
+            _vm._v(" "),
+            _c("a", { staticClass: "card-link", attrs: { href: "#" } }, [
+              _vm._v(" Add to cart ")
+            ])
+          ])
+        ])
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 

@@ -16,10 +16,11 @@ class CreateRestoMenus extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('item_name');
-            $table->string('price');
-            $table->string('category')->nullable();
-            $table->string('sold_count')->default(0);
-            $table->string('resto_id');
+            $table->double('price');
+            $table->integer('qty');
+            $table->integer('category_id')->nullable();
+            $table->integer('sold_count')->default(0);
+            $table->integer('resto_id');
             $table->softDeletes();
             $table->timestamps();
         });

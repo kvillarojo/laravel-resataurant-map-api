@@ -86,7 +86,7 @@ class RestaurantController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        return null;
     }
 
     /**
@@ -97,6 +97,6 @@ class RestaurantController extends Controller
      */
     public function destroy($id)
     {
-        //
+         return null;
     }
 }
