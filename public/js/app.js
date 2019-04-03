@@ -1948,45 +1948,38 @@ __webpack_require__.r(__webpack_exports__);
           special: newData.specialty,
           category: newData.category
         });
-      } // this.bounds = new google.maps.LatLngBounds();
-      // const element = document.getElementById(this.mapName)
-      // const mapCentre = this.markerCoordinates[0]
-      // const options = {
-      //   center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
-      //   zoom: 4
-      // }
-      // this.map = new google.maps.Map(element, options);
-      // this.markerCoordinates.forEach((coord) => {
-      //   const position = new google.maps.LatLng(coord.latitude, coord.longitude);
-      //   const marker = new google.maps.Marker({ 
-      //     position,
-      //     map: this.map,
-      //     title: coord.name
-      //   });
-      //   const contentString = 
-      //     `<div id="content">
-      //       <div id="siteNotice">
-      //       </div>
-      //       <h4 id="firstHeading" class="firstHeading">` + coord.name  +`</h4>
-      //       <div id="bodyContent">
-      //        <p><strong>Special:</strong> `+  coord.special + `</p>
-      //        <p><strong>Category: </strong>`+  coord.category + `</p><br>
-      //       <p><strong>Latiude:  </strong>`+ coord.latitude + ` <span style="float: right; margin-left:10px"> <strong>Longitude: </strong> ` + coord.longitude + ` </p>
-      //       </div>
-      //   </div>`;  
-      //   const infowindow = new google.maps.InfoWindow({
-      //     content: contentString
-      //   });
-      //   marker.addListener('mouseover', function() {       
-      //       infowindow.open(this.map, marker);
-      //   });
-      //   marker.addListener('mouseout', function() {       
-      //       infowindow.close();
-      //   });
-      // this.markers.push(marker)
-      //   this.map.fitBounds(this.bounds.extend(position))
-      // });  
+      }
 
+      this.bounds = new google.maps.LatLngBounds();
+      var element = document.getElementById(this.mapName);
+      var mapCentre = this.markerCoordinates[0];
+      var options = {
+        center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
+        zoom: 4
+      };
+      this.map = new google.maps.Map(element, options);
+      this.markerCoordinates.forEach(function (coord) {
+        var position = new google.maps.LatLng(coord.latitude, coord.longitude);
+        var marker = new google.maps.Marker({
+          position: position,
+          map: _this2.map,
+          title: coord.name
+        });
+        var contentString = "<div id=\"content\">\n            <div id=\"siteNotice\">\n            </div>\n            <h4 id=\"firstHeading\" class=\"firstHeading\">" + coord.name + "</h4>\n            <div id=\"bodyContent\">\n             <p><strong>Special:</strong> " + coord.special + "</p>\n             <p><strong>Category: </strong>" + coord.category + "</p><br>\n            <p><strong>Latiude:  </strong>" + coord.latitude + " <span style=\"float: right; margin-left:10px\"> <strong>Longitude: </strong> " + coord.longitude + " </p>\n            </div>\n        </div>";
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
+        marker.addListener('mouseover', function () {
+          infowindow.open(this.map, marker);
+        });
+        marker.addListener('mouseout', function () {
+          infowindow.close();
+        });
+
+        _this2.markers.push(marker);
+
+        _this2.map.fitBounds(_this2.bounds.extend(position));
+      });
     },
     loadnewCoordinates: function loadnewCoordinates(id) {
       this.setID = id;

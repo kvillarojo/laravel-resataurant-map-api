@@ -169,50 +169,50 @@ export default {
         this.markerCoordinates.push({latitude: newData.latitude, longitude: newData.longitude,  name: newData.name, address: newData.addresss, special: newData.specialty, category: newData.category})
       }
 
-      // this.bounds = new google.maps.LatLngBounds();
-      // const element = document.getElementById(this.mapName)
-      // const mapCentre = this.markerCoordinates[0]
-      // const options = {
-      //   center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
-      //   zoom: 4
-      // }
+      this.bounds = new google.maps.LatLngBounds();
+      const element = document.getElementById(this.mapName)
+      const mapCentre = this.markerCoordinates[0]
+      const options = {
+        center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude),
+        zoom: 4
+      }
 
-      // this.map = new google.maps.Map(element, options);
-      // this.markerCoordinates.forEach((coord) => {
-      //   const position = new google.maps.LatLng(coord.latitude, coord.longitude);
-      //   const marker = new google.maps.Marker({ 
-      //     position,
-      //     map: this.map,
-      //     title: coord.name
-      //   });
+      this.map = new google.maps.Map(element, options);
+      this.markerCoordinates.forEach((coord) => {
+        const position = new google.maps.LatLng(coord.latitude, coord.longitude);
+        const marker = new google.maps.Marker({ 
+          position,
+          map: this.map,
+          title: coord.name
+        });
         
-      //   const contentString = 
-      //     `<div id="content">
-      //       <div id="siteNotice">
-      //       </div>
-      //       <h4 id="firstHeading" class="firstHeading">` + coord.name  +`</h4>
-      //       <div id="bodyContent">
-      //        <p><strong>Special:</strong> `+  coord.special + `</p>
-      //        <p><strong>Category: </strong>`+  coord.category + `</p><br>
-      //       <p><strong>Latiude:  </strong>`+ coord.latitude + ` <span style="float: right; margin-left:10px"> <strong>Longitude: </strong> ` + coord.longitude + ` </p>
-      //       </div>
-      //   </div>`;  
+        const contentString = 
+          `<div id="content">
+            <div id="siteNotice">
+            </div>
+            <h4 id="firstHeading" class="firstHeading">` + coord.name  +`</h4>
+            <div id="bodyContent">
+             <p><strong>Special:</strong> `+  coord.special + `</p>
+             <p><strong>Category: </strong>`+  coord.category + `</p><br>
+            <p><strong>Latiude:  </strong>`+ coord.latitude + ` <span style="float: right; margin-left:10px"> <strong>Longitude: </strong> ` + coord.longitude + ` </p>
+            </div>
+        </div>`;  
 
-      //   const infowindow = new google.maps.InfoWindow({
-      //     content: contentString
-      //   });
+        const infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
 
-      //   marker.addListener('mouseover', function() {       
-      //       infowindow.open(this.map, marker);
-      //   });
+        marker.addListener('mouseover', function() {       
+            infowindow.open(this.map, marker);
+        });
 
-      //   marker.addListener('mouseout', function() {       
-      //       infowindow.close();
-      //   });
+        marker.addListener('mouseout', function() {       
+            infowindow.close();
+        });
 
-      // this.markers.push(marker)
-      //   this.map.fitBounds(this.bounds.extend(position))
-      // });  
+      this.markers.push(marker)
+        this.map.fitBounds(this.bounds.extend(position))
+      });  
       
     },
     loadnewCoordinates(id){
